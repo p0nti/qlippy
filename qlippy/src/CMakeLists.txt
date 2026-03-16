@@ -1,0 +1,6 @@
+add_subdirectory(common)
+add_subdirectory(ipc)
+add_subdirectory(storage)
+add_subdirectory(platform)
+add_subdirectory(ui)
+add_subdirectory(app)
