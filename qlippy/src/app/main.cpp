@@ -16,9 +16,10 @@
 #include <csignal>
 #include <cstdlib>
 
-static bool hasArg(int argc, char* argv[], const char* arg)
+static bool hasArg(int argc, char *argv[], const char *arg)
 {
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i)
+    {
         if (QString::fromLocal8Bit(argv[i]) == QString::fromLatin1(arg))
             return true;
     }
@@ -34,7 +35,8 @@ static bool tryAutoStart()
         return false;
 
     // Poll until the socket is available, max 2 s
-    for (int i = 0; i < 20; ++i) {
+    for (int i = 0; i < 20; ++i)
+    {
         QThread::msleep(100);
         IpcClient probe;
         if (probe.connectToServer(200))
@@ -44,34 +46,38 @@ static bool tryAutoStart()
 }
 
 // Connect to daemon, auto-starting it if necessary.
-static bool ensureConnected(IpcClient& client)
+static bool ensureConnected(IpcClient &client)
 {
     if (client.connectToServer(500))
         return true;
 
     QTextStream(stderr) << "qlippy: daemon not running, starting it...\n";
-    if (!tryAutoStart()) {
+    if (!tryAutoStart())
+    {
         QTextStream(stderr) << "error: failed to start daemon\n";
         return false;
     }
     return client.connectToServer(500);
 }
 
-static int cliSend(const IpcMessage& msg)
+static int cliSend(const IpcMessage &msg)
 {
     IpcClient client;
-    if (!ensureConnected(client)) {
+    if (!ensureConnected(client))
+    {
         QTextStream(stderr) << "error: cannot connect to daemon\n";
         return EXIT_FAILURE;
     }
 
     auto resp = client.sendSync(msg, 3000);
-    if (!resp.has_value()) {
+    if (!resp.has_value())
+    {
         QTextStream(stderr) << "error: no response from daemon\n";
         return EXIT_FAILURE;
     }
 
-    if (!resp->ok) {
+    if (!resp->ok)
+    {
         QTextStream(stderr) << "error: " << resp->error << "\n";
         return EXIT_FAILURE;
     }
@@ -80,31 +86,35 @@ static int cliSend(const IpcMessage& msg)
 }
 
 // Like cliSend but prints the response data as JSON to stdout.
-static int cliSendPrint(const IpcMessage& msg)
+static int cliSendPrint(const IpcMessage &msg)
 {
     IpcClient client;
-    if (!ensureConnected(client)) {
+    if (!ensureConnected(client))
+    {
         QTextStream(stderr) << "error: cannot connect to daemon\n";
         return EXIT_FAILURE;
     }
 
     auto resp = client.sendSync(msg, 3000);
-    if (!resp.has_value()) {
+    if (!resp.has_value())
+    {
         QTextStream(stderr) << "error: no response from daemon\n";
         return EXIT_FAILURE;
     }
 
-    if (!resp->ok) {
+    if (!resp->ok)
+    {
         QTextStream(stderr) << "error: " << resp->error << "\n";
         return EXIT_FAILURE;
     }
 
     QTextStream(stdout) << QString::fromUtf8(
-        QJsonDocument(resp->data).toJson(QJsonDocument::Compact)) << "\n";
+                               QJsonDocument(resp->data).toJson(QJsonDocument::Compact))
+                        << "\n";
     return EXIT_SUCCESS;
 }
 
-static int runWithApp(QCoreApplication& app)
+static int runWithApp(QCoreApplication &app)
 {
     QCoreApplication::setApplicationName("qlippy");
     QCoreApplication::setApplicationVersion("0.1.0");
@@ -114,17 +124,17 @@ static int runWithApp(QCoreApplication& app)
     parser.addHelpOption();
     parser.addVersionOption();
 
-    QCommandLineOption daemonOpt ("daemon",  "Run as background daemon");
-    QCommandLineOption popupOpt  ("popup",   "Show clipboard popup");
-    QCommandLineOption toggleOpt ("toggle",  "Toggle clipboard popup");
-    QCommandLineOption listOpt   ("list",    "List clipboard history (JSON)");
-    QCommandLineOption searchOpt ("search",  "Search clipboard history (JSON)", "query");
-    QCommandLineOption copyOpt   ("copy",    "Copy item by id to clipboard", "id");
-    QCommandLineOption deleteOpt ("delete",  "Delete item by id",            "id");
-    QCommandLineOption pinOpt    ("pin",     "Pin item by id",                "id");
-    QCommandLineOption unpinOpt  ("unpin",   "Unpin item by id",              "id");
-    QCommandLineOption clearOpt  ("clear",   "Clear all history");
-    QCommandLineOption stopOpt   ("stop",    "Stop the running daemon");
+    QCommandLineOption daemonOpt("daemon", "Run as background daemon");
+    QCommandLineOption popupOpt("popup", "Show clipboard popup");
+    QCommandLineOption toggleOpt("toggle", "Toggle clipboard popup");
+    QCommandLineOption listOpt("list", "List clipboard history (JSON)");
+    QCommandLineOption searchOpt("search", "Search clipboard history (JSON)", "query");
+    QCommandLineOption copyOpt("copy", "Copy item by id to clipboard", "id");
+    QCommandLineOption deleteOpt("delete", "Delete item by id", "id");
+    QCommandLineOption pinOpt("pin", "Pin item by id", "id");
+    QCommandLineOption unpinOpt("unpin", "Unpin item by id", "id");
+    QCommandLineOption clearOpt("clear", "Clear all history");
+    QCommandLineOption stopOpt("stop", "Stop the running daemon");
     QCommandLineOption verboseOpt("verbose", "Enable debug logging");
 
     parser.addOption(daemonOpt);
@@ -164,57 +174,69 @@ static int runWithApp(QCoreApplication& app)
     if (parser.isSet(stopOpt))
         return cliSend(IpcMessage::request(IpcCmd::StopDaemon));
 
-    if (parser.isSet(copyOpt)) {
+    if (parser.isSet(copyOpt))
+    {
         bool ok = false;
         const qint64 id = parser.value(copyOpt).toLongLong(&ok);
-        if (!ok || id <= 0) {
+        if (!ok || id <= 0)
+        {
             QTextStream(stderr) << "error: invalid id\n";
             return EXIT_FAILURE;
         }
         return cliSend(IpcMessage::request(IpcCmd::CopyItem, {{"id", id}}));
     }
 
-    if (parser.isSet(deleteOpt)) {
+    if (parser.isSet(deleteOpt))
+    {
         bool ok = false;
         const qint64 id = parser.value(deleteOpt).toLongLong(&ok);
-        if (!ok || id <= 0) {
+        if (!ok || id <= 0)
+        {
             QTextStream(stderr) << "error: invalid id\n";
             return EXIT_FAILURE;
         }
         return cliSend(IpcMessage::request(IpcCmd::DeleteItem, {{"id", id}}));
     }
 
-    if (parser.isSet(pinOpt)) {
+    if (parser.isSet(pinOpt))
+    {
         bool ok = false;
         const qint64 id = parser.value(pinOpt).toLongLong(&ok);
-        if (!ok || id <= 0) {
+        if (!ok || id <= 0)
+        {
             QTextStream(stderr) << "error: invalid id\n";
             return EXIT_FAILURE;
         }
         return cliSend(IpcMessage::request(IpcCmd::PinItem, {{"id", id}, {"pinned", true}}));
     }
 
-    if (parser.isSet(unpinOpt)) {
+    if (parser.isSet(unpinOpt))
+    {
         bool ok = false;
         const qint64 id = parser.value(unpinOpt).toLongLong(&ok);
-        if (!ok || id <= 0) {
+        if (!ok || id <= 0)
+        {
             QTextStream(stderr) << "error: invalid id\n";
             return EXIT_FAILURE;
         }
         return cliSend(IpcMessage::request(IpcCmd::PinItem, {{"id", id}, {"pinned", false}}));
     }
 
-    if (parser.isSet(daemonOpt)) {
+    if (parser.isSet(daemonOpt))
+    {
         // Install SIGTERM/SIGINT handlers so the daemon shuts down gracefully.
-        std::signal(SIGTERM, [](int) { QCoreApplication::quit(); });
-        std::signal(SIGINT,  [](int) { QCoreApplication::quit(); });
+        std::signal(SIGTERM, [](int)
+                    { QCoreApplication::quit(); });
+        std::signal(SIGINT, [](int)
+                    { QCoreApplication::quit(); });
 
         Logger::instance().openFile();
         LOG_INFO("qlippy daemon starting (pid " + QString::number(QCoreApplication::applicationPid()) + ")");
 
         DaemonApp daemon;
 
-        QObject::connect(&daemon, &DaemonApp::startupFailed, [](const QString& reason) {
+        QObject::connect(&daemon, &DaemonApp::startupFailed, [](const QString &reason)
+                         {
             QTextStream(stderr) << "fatal: " << reason << "\n";
 
             // When user manually starts a second daemon instance, provide a clear GUI hint.
@@ -225,8 +247,7 @@ static int runWithApp(QCoreApplication& app)
                                          QStringLiteral("Another qlippy daemon is already active."));
             }
 
-            QCoreApplication::exit(EXIT_FAILURE);
-        });
+            QCoreApplication::exit(EXIT_FAILURE); });
 
         if (!daemon.start())
             return EXIT_FAILURE;
@@ -238,11 +259,12 @@ static int runWithApp(QCoreApplication& app)
     parser.showHelp(EXIT_FAILURE);
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     const bool daemonMode = hasArg(argc, argv, "--daemon");
 
-    if (daemonMode) {
+    if (daemonMode)
+    {
         // Keep Qt Quick Controls independent from desktop widget style plugins
         // such as kvantum, which may not provide a QML style module.
         QQuickStyle::setStyle(QStringLiteral("Fusion"));

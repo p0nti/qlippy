@@ -17,12 +17,11 @@ QString IpcServer::socketPath()
     return runtimeDir + "/" + QString::fromLatin1(kSocketName);
 }
 
-IpcServer::IpcServer(QObject* parent)
-    : QObject(parent)
-    , m_server(new QLocalServer(this))
+IpcServer::IpcServer(QObject *parent)
+    : QObject(parent), m_server(new QLocalServer(this))
 {
     connect(m_server, &QLocalServer::newConnection,
-            this,     &IpcServer::onNewConnection);
+            this, &IpcServer::onNewConnection);
 }
 
 IpcServer::~IpcServer()
@@ -39,7 +38,8 @@ bool IpcServer::start()
     {
         QLocalSocket probe;
         probe.connectToServer(path);
-        if (probe.waitForConnected(150)) {
+        if (probe.waitForConnected(150))
+        {
             probe.disconnectFromServer();
             m_lastError = QStringLiteral("another qlippy daemon is already active");
             return false;
@@ -48,7 +48,8 @@ bool IpcServer::start()
 
     // No reachable server: cleanup stale socket file if present.
     QLocalServer::removeServer(path);
-    if (!m_server->listen(path)) {
+    if (!m_server->listen(path))
+    {
         m_lastError = m_server->errorString();
         return false;
     }
@@ -65,9 +66,10 @@ bool IpcServer::isListening() const
     return m_server->isListening();
 }
 
-void IpcServer::reply(QLocalSocket* conn, const IpcMessage& msg)
+void IpcServer::reply(QLocalSocket *conn, const IpcMessage &msg)
 {
-    if (conn && conn->isValid()) {
+    if (conn && conn->isValid())
+    {
         conn->write(JsonCodec::encode(msg));
         conn->flush();
     }
@@ -78,8 +80,9 @@ void IpcServer::reply(QLocalSocket* conn, const IpcMessage& msg)
 // ---------------------------------------------------------------------------
 void IpcServer::onNewConnection()
 {
-    while (m_server->hasPendingConnections()) {
-        QLocalSocket* conn = m_server->nextPendingConnection();
+    while (m_server->hasPendingConnections())
+    {
+        QLocalSocket *conn = m_server->nextPendingConnection();
         m_buffers[conn] = QByteArray{};
 
         connect(conn, &QLocalSocket::readyRead,
@@ -91,23 +94,27 @@ void IpcServer::onNewConnection()
 
 void IpcServer::onReadyRead()
 {
-    auto* conn = qobject_cast<QLocalSocket*>(sender());
-    if (!conn) return;
+    auto *conn = qobject_cast<QLocalSocket *>(sender());
+    if (!conn)
+        return;
 
-    QByteArray& buf = m_buffers[conn];
+    QByteArray &buf = m_buffers[conn];
     buf.append(conn->readAll());
 
-    while (true) {
+    while (true)
+    {
         auto msg = JsonCodec::tryRead(buf);
-        if (!msg.has_value()) break;
+        if (!msg.has_value())
+            break;
         emit commandReceived(*msg, conn);
     }
 }
 
 void IpcServer::onDisconnected()
 {
-    auto* conn = qobject_cast<QLocalSocket*>(sender());
-    if (!conn) return;
+    auto *conn = qobject_cast<QLocalSocket *>(sender());
+    if (!conn)
+        return;
     m_buffers.remove(conn);
     conn->deleteLater();
 }

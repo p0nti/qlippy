@@ -10,7 +10,8 @@
 class QLocalSocket;
 
 // Listens on the well-known socket name and dispatches incoming commands.
-class IpcServer : public QObject {
+class IpcServer : public QObject
+{
     Q_OBJECT
 public:
     static constexpr char kSocketName[] = "qlippy-ipc-v1";
@@ -19,7 +20,7 @@ public:
     // Both server and client must use this to agree on the path.
     static QString socketPath();
 
-    explicit IpcServer(QObject* parent = nullptr);
+    explicit IpcServer(QObject *parent = nullptr);
     ~IpcServer() override;
 
     bool start();
@@ -28,10 +29,10 @@ public:
     QString lastError() const { return m_lastError; }
 
     // Send a response back to the connection that sent a command.
-    void reply(QLocalSocket* conn, const IpcMessage& msg);
+    void reply(QLocalSocket *conn, const IpcMessage &msg);
 
 signals:
-    void commandReceived(IpcMessage msg, QLocalSocket* conn);
+    void commandReceived(IpcMessage msg, QLocalSocket *conn);
 
 private slots:
     void onNewConnection();
@@ -39,7 +40,7 @@ private slots:
     void onDisconnected();
 
 private:
-    QLocalServer*                   m_server;
-    QHash<QLocalSocket*, QByteArray> m_buffers;
-    QString                          m_lastError;
+    QLocalServer *m_server;
+    QHash<QLocalSocket *, QByteArray> m_buffers;
+    QString m_lastError;
 };
