@@ -17,6 +17,10 @@ namespace
 
     QString normalizeTheme(const QString &value)
     {
+        if (value == QLatin1String("system-dark") || value == QLatin1String("system_light") || value == QLatin1String("system-light"))
+            return value == QLatin1String("system_light") ? QStringLiteral("system-light") : value;
+        if (value == QLatin1String("system"))
+            return QStringLiteral("system-dark");
         if (value == QLatin1String("catppuccin"))
             return value;
         if (value == QLatin1String("nord"))

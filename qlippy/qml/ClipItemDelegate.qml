@@ -194,7 +194,6 @@ Rectangle {
         onEntered: root.hovered = true
         onExited: root.hovered = false
         onClicked: {
-            root.deleteConfirmArmed = false
             if (listView) {
                 listView.currentIndex = row
                 listView.forceActiveFocus()

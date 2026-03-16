@@ -32,9 +32,24 @@ IpcServer::~IpcServer()
 
 bool IpcServer::start()
 {
+    m_lastError.clear();
     const QString path = socketPath();
+
+    // If another daemon is already listening on this socket, do not steal it.
+    {
+        QLocalSocket probe;
+        probe.connectToServer(path);
+        if (probe.waitForConnected(150)) {
+            probe.disconnectFromServer();
+            m_lastError = QStringLiteral("another qlippy daemon is already active");
+            return false;
+        }
+    }
+
+    // No reachable server: cleanup stale socket file if present.
     QLocalServer::removeServer(path);
     if (!m_server->listen(path)) {
+        m_lastError = m_server->errorString();
         return false;
     }
     return true;

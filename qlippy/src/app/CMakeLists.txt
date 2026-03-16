@@ -11,6 +11,7 @@ target_include_directories(qlippy PRIVATE
 target_link_libraries(qlippy PRIVATE
     Qt6::Core
     Qt6::Gui
+    Qt6::Widgets
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2

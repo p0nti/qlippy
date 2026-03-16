@@ -20,6 +20,8 @@ Rectangle {
     readonly property real buttonSize: layoutData ? layoutData.sliderButtonSize : 24
     readonly property real rowContentInset: Math.max(8, root.sliderInset - 4)
     readonly property real toggleWidth: Math.max(56, root.buttonSize * 2)
+    readonly property var themeLabels: ["System Dark", "System Light", "Teal", "Catppuccin"]
+    readonly property var themeValues: ["system-dark", "system-light", "teal", "catppuccin"]
 
     width: panelWidth
     radius: 16
@@ -107,45 +109,112 @@ Rectangle {
                     font.pixelSize: layoutData ? layoutData.labelFontSize : 13
                 }
 
-                RowLayout {
+                ComboBox {
+                    id: themeSelector
                     Layout.fillWidth: true
-                    spacing: Math.max(4, root.sectionGap - 8)
+                    Layout.preferredHeight: root.controlHeight
+                    model: root.themeLabels
+                    currentIndex: {
+                        if (!settingsObject)
+                            return 0
+                        for (let i = 0; i < root.themeValues.length; ++i) {
+                            if (root.themeValues[i] === settingsObject.theme)
+                                return i
+                        }
+                        return 0
+                    }
+                    onActivated: {
+                        if (settingsObject && currentIndex >= 0 && currentIndex < root.themeValues.length)
+                            settingsObject.theme = root.themeValues[currentIndex]
+                    }
 
-                    Repeater {
-                        model: [
-                            { label: "Teal", value: "teal" },
-                            { label: "Catppuccin", value: "catppuccin" }
-                        ]
+                    delegate: ItemDelegate {
+                        required property var modelData
+                        required property int index
 
-                        delegate: Rectangle {
-                            required property var modelData
+                        width: themeSelector.width
+                        height: root.controlHeight
+                        highlighted: themeSelector.highlightedIndex === index
+                        padding: 6
+                        hoverEnabled: true
 
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: root.controlHeight
-                            radius: 10
-                            color: settingsObject && settingsObject.theme === modelData.value
+                        contentItem: Text {
+                            text: modelData
+                            color: themeData ? themeData.text : "#F4F1E8"
+                            font.family: "IBM Plex Sans, Noto Sans, Sans Serif"
+                            font.pixelSize: layoutData ? layoutData.controlFontSize : 13
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                        }
+
+                        background: Rectangle {
+                            radius: 8
+                            color: highlighted
                                 ? (themeData ? themeData.selectedPanel : "#1D5A56")
-                                : (themeData ? themeData.panel : "#171D20")
-                            border.width: 1
-                            border.color: settingsObject && settingsObject.theme === modelData.value
+                                : (hovered ? (themeData ? Qt.lighter(themeData.panel, 1.08) : "#202A2F") : "transparent")
+                            border.width: highlighted ? 1 : (hovered ? 1 : 0)
+                            border.color: highlighted
                                 ? (themeData ? themeData.accent : "#42C5B8")
                                 : (themeData ? themeData.border : "#2F3A3F")
+                        }
+                    }
 
-                            Text {
-                                anchors.centerIn: parent
-                                text: modelData.label
-                                color: themeData ? themeData.text : "#F4F1E8"
-                                font.family: "IBM Plex Sans, Noto Sans, Sans Serif"
-                                font.pixelSize: layoutData ? layoutData.controlFontSize : 13
-                            }
+                    contentItem: Text {
+                        leftPadding: 10
+                        rightPadding: 24
+                        text: themeSelector.displayText
+                        color: themeData ? themeData.text : "#F4F1E8"
+                        font.family: "IBM Plex Sans, Noto Sans, Sans Serif"
+                        font.pixelSize: layoutData ? layoutData.controlFontSize : 13
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                    }
 
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    if (settingsObject)
-                                        settingsObject.theme = modelData.value
-                                }
-                            }
+                    indicator: Canvas {
+                        x: themeSelector.width - width - 10
+                        y: (themeSelector.height - height) / 2
+                        width: 10
+                        height: 6
+                        contextType: "2d"
+                        onPaint: {
+                            const ctx = getContext("2d")
+                            ctx.reset()
+                            ctx.moveTo(0, 0)
+                            ctx.lineTo(width, 0)
+                            ctx.lineTo(width / 2, height)
+                            ctx.closePath()
+                            ctx.fillStyle = themeData ? themeData.muted : "#8FA6A2"
+                            ctx.fill()
+                        }
+                    }
+
+                    background: Rectangle {
+                        radius: 10
+                        color: themeData ? themeData.panel : "#171D20"
+                        border.width: 1
+                        border.color: themeData ? themeData.border : "#2F3A3F"
+                    }
+
+                    popup: Popup {
+                        y: themeSelector.height + 4
+                        width: themeSelector.width
+                        padding: 6
+                        implicitHeight: Math.min(contentItem.implicitHeight + 8, root.height * 0.45)
+
+                        contentItem: ListView {
+                            clip: true
+                            implicitHeight: contentHeight
+                            model: themeSelector.delegateModel
+                            currentIndex: themeSelector.highlightedIndex
+                            spacing: 4
+                            ScrollIndicator.vertical: ScrollIndicator {}
+                        }
+
+                        background: Rectangle {
+                            radius: 10
+                            color: themeData ? Qt.darker(themeData.panel, 1.04) : "#171D20"
+                            border.width: 1
+                            border.color: themeData ? themeData.border : "#2F3A3F"
                         }
                     }
                 }

@@ -63,8 +63,10 @@ bool DaemonApp::start()
             this,              &DaemonApp::onCommandReceived);
 
     if (!m_ipcServer->start()) {
-        const QString err = "IPC server failed to start on socket: " +
-                            QString(IpcServer::kSocketName);
+        const QString detail = m_ipcServer->lastError();
+        const QString err = detail.isEmpty()
+            ? ("IPC server failed to start on socket: " + QString(IpcServer::kSocketName))
+            : detail;
         LOG_ERROR(err);
         emit startupFailed(err);
         return false;

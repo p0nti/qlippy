@@ -12,7 +12,79 @@ Window {
     readonly property var themeData: themeFor(settingsModel.theme)
     readonly property var layoutData: layoutFor(settingsModel.layout)
 
+    SystemPalette {
+        id: systemPalette
+        colorGroup: SystemPalette.Active
+    }
+
+    function mixColor(a, b, amount) {
+        const mixAmount = Math.max(0, Math.min(1, amount))
+        return Qt.rgba(
+            a.r + (b.r - a.r) * mixAmount,
+            a.g + (b.g - a.g) * mixAmount,
+            a.b + (b.b - a.b) * mixAmount,
+            a.a + (b.a - a.a) * mixAmount
+        )
+    }
+
+    function colorLuma(color) {
+        return (0.2126 * color.r) + (0.7152 * color.g) + (0.0722 * color.b)
+    }
+
+    function withAlpha(color, alpha) {
+        return Qt.rgba(color.r, color.g, color.b, alpha)
+    }
+
+    function systemTheme(forceDark) {
+        const rawBg = systemPalette.window
+        const rawBase = systemPalette.base
+        const rawText = systemPalette.windowText
+        const accent = systemPalette.highlight
+        const nativeDark = colorLuma(rawBg) < 0.5
+        const isDark = forceDark === undefined ? nativeDark : forceDark
+
+        // If the platform only exposes one palette direction, synthesize the other one.
+        const bg = isDark
+            ? (nativeDark ? rawBg : mixColor(rawBg, Qt.rgba(0, 0, 0, 1), 0.84))
+            : (nativeDark ? mixColor(rawBg, Qt.rgba(1, 1, 1, 1), 0.86) : rawBg)
+        const base = isDark
+            ? (nativeDark ? rawBase : mixColor(rawBase, Qt.rgba(0, 0, 0, 1), 0.78))
+            : (nativeDark ? mixColor(rawBase, Qt.rgba(1, 1, 1, 1), 0.82) : rawBase)
+        const text = isDark
+            ? (nativeDark ? rawText : mixColor(rawText, Qt.rgba(1, 1, 1, 1), 0.88))
+            : (nativeDark ? mixColor(rawText, Qt.rgba(0, 0, 0, 1), 0.90) : rawText)
+
+        const panel = mixColor(bg, base, isDark ? 0.5 : 0.72)
+        const border = mixColor(bg, text, isDark ? 0.24 : 0.16)
+        const muted = mixColor(text, bg, isDark ? 0.42 : 0.52)
+        const selectedPanel = mixColor(panel, accent, isDark ? 0.24 : 0.14)
+        const warningSeed = isDark ? Qt.rgba(0.92, 0.76, 0.50, 1) : Qt.rgba(0.70, 0.48, 0.20, 1)
+        const warning = mixColor(warningSeed, accent, isDark ? 0.12 : 0.06)
+        const veilBase = isDark ? Qt.rgba(0, 0, 0, 1) : Qt.rgba(0.10, 0.12, 0.16, 1)
+
+        return {
+            bg: bg,
+            panel: panel,
+            text: text,
+            accent: accent,
+            border: border,
+            muted: muted,
+            warning: warning,
+            selectedPanel: selectedPanel,
+            veil: withAlpha(veilBase, isDark ? 0.42 : 0.20)
+        }
+    }
+
     function themeFor(name) {
+        if (name === "system-dark") {
+            return systemTheme(true)
+        }
+        if (name === "system-light") {
+            return systemTheme(false)
+        }
+        if (name === "system") {
+            return systemTheme(true)
+        }
         if (name === "catppuccin") {
             return {
                 bg: "#303446",

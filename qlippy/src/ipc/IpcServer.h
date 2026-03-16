@@ -25,6 +25,7 @@ public:
     bool start();
     void stop();
     bool isListening() const;
+    QString lastError() const { return m_lastError; }
 
     // Send a response back to the connection that sent a command.
     void reply(QLocalSocket* conn, const IpcMessage& msg);
@@ -40,4 +41,5 @@ private slots:
 private:
     QLocalServer*                   m_server;
     QHash<QLocalSocket*, QByteArray> m_buffers;
+    QString                          m_lastError;
 };

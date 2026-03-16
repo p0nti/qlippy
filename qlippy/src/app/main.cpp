@@ -4,10 +4,12 @@
 #include "common/Logger.h"
 
 #include <QCoreApplication>
-#include <QGuiApplication>
+#include <QApplication>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
 #include <QJsonDocument>
+#include <QMessageBox>
+#include <QQuickStyle>
 #include <QProcess>
 #include <QThread>
 #include <QTextStream>
@@ -214,6 +216,15 @@ static int runWithApp(QCoreApplication& app)
 
         QObject::connect(&daemon, &DaemonApp::startupFailed, [](const QString& reason) {
             QTextStream(stderr) << "fatal: " << reason << "\n";
+
+            // When user manually starts a second daemon instance, provide a clear GUI hint.
+            if (reason.contains(QStringLiteral("another qlippy daemon is already active"), Qt::CaseInsensitive)
+                && qobject_cast<QGuiApplication*>(QCoreApplication::instance())) {
+                QMessageBox::information(nullptr,
+                                         QStringLiteral("qlippy"),
+                                         QStringLiteral("Another qlippy daemon is already active."));
+            }
+
             QCoreApplication::exit(EXIT_FAILURE);
         });
 
@@ -232,7 +243,10 @@ int main(int argc, char* argv[])
     const bool daemonMode = hasArg(argc, argv, "--daemon");
 
     if (daemonMode) {
-        QGuiApplication app(argc, argv);
+        // Keep Qt Quick Controls independent from desktop widget style plugins
+        // such as kvantum, which may not provide a QML style module.
+        QQuickStyle::setStyle(QStringLiteral("Fusion"));
+        QApplication app(argc, argv);
         return runWithApp(app);
     }
 
