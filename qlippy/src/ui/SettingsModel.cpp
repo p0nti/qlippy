@@ -16,6 +16,7 @@ SettingsModel::SettingsModel(Settings* settings, QObject* parent)
     connect(m_settings, &Settings::compactImageExpandChanged, this, &SettingsModel::compactImageExpandChanged);
     connect(m_settings, &Settings::dedupeChanged, this, &SettingsModel::dedupeChanged);
     connect(m_settings, &Settings::saveImagesChanged, this, &SettingsModel::saveImagesChanged);
+    connect(m_settings, &Settings::allowDeletionItemsChanged, this, &SettingsModel::allowDeletionItemsChanged);
     connect(m_settings, &Settings::maxHistoryChanged, this, &SettingsModel::maxHistoryChanged);
 }
 
@@ -52,6 +53,11 @@ bool SettingsModel::dedupe() const
 bool SettingsModel::saveImages() const
 {
     return m_settings ? m_settings->saveImages() : true;
+}
+
+bool SettingsModel::allowDeletionItems() const
+{
+    return m_settings ? m_settings->allowDeletionItems() : false;
 }
 
 int SettingsModel::maxHistory() const
@@ -106,6 +112,13 @@ void SettingsModel::setSaveImages(bool value)
     if (!m_settings)
         return;
     m_settings->setSaveImages(value);
+}
+
+void SettingsModel::setAllowDeletionItems(bool value)
+{
+    if (!m_settings)
+        return;
+    m_settings->setAllowDeletionItems(value);
 }
 
 void SettingsModel::setMaxHistory(int value)

@@ -291,6 +291,8 @@ Window {
                         metaTextColor: themeData.warning
                         textIndicatorColor: themeData.accent
                         imageIndicatorColor: themeData.warning
+                        showDeleteIcon: settingsModel.allowDeletionItems
+                        deleteIconColor: themeData.warning
                     }
 
                     Keys.onPressed: function(event) {
@@ -298,8 +300,13 @@ Window {
                             clipboardModel.activate(currentIndex)
                             event.accepted = true
                         } else if (event.key === Qt.Key_Delete) {
-                            clipboardModel.deleteAt(currentIndex)
-                            event.accepted = true
+                            if (settingsModel.allowDeletionItems) {
+                                // Don't delete pinned items
+                                if (!clipboardModel.isPinnedAt(currentIndex)) {
+                                    clipboardModel.deleteAt(currentIndex)
+                                    event.accepted = true
+                                }
+                            }
                         } else if (event.key === Qt.Key_P) {
                             clipboardModel.togglePinAt(currentIndex)
                             event.accepted = true

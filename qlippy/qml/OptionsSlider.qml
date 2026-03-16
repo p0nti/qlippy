@@ -237,7 +237,8 @@ Rectangle {
                         { label: "Expand mode", key: "expandMode" },
                         { label: "Adjust images when in expand mode", key: "compactImageExpand" },
                         { label: "Dedupe", key: "dedupe" },
-                        { label: "Save images", key: "saveImages" }
+                        { label: "Save images", key: "saveImages" },
+                        { label: "Allow deletion items", key: "allowDeletionItems" }
                     ]
 
                     delegate: Rectangle {

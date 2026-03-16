@@ -45,6 +45,7 @@ public:
     Q_INVOKABLE void activate(int row);
     Q_INVOKABLE void deleteAt(int row);
     Q_INVOKABLE void togglePinAt(int row);
+    Q_INVOKABLE bool isPinnedAt(int row) const;
 
     void setCopyHandler(std::function<void(qint64)> handler) { m_copyHandler = std::move(handler); }
 

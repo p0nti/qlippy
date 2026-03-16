@@ -20,6 +20,7 @@ public:
     static constexpr char KeyMaxBytes[]    = "max_bytes";
     static constexpr char KeySaveImages[]  = "save_images";
     static constexpr char KeyDedupe[]      = "dedupe";
+    static constexpr char KeyAllowDeletionItems[] = "allow_deletion_items";
 
     explicit Settings(Storage* storage, QObject* parent = nullptr);
 
@@ -33,6 +34,7 @@ public:
     qint64 maxBytes()  const;   // default 50 MB
     bool saveImages()  const;   // default true
     bool dedupe()      const;   // default true
+    bool allowDeletionItems() const; // default false
 
     // Typed setters
     void setLayout(const QString& value);
@@ -43,6 +45,7 @@ public:
     void setMaxHistory(int value);
     void setSaveImages(bool value);
     void setDedupe(bool value);
+    void setAllowDeletionItems(bool value);
 
     // Generic accessors
     QString get(const QString& key, const QString& defaultValue = {}) const;
@@ -57,6 +60,7 @@ signals:
     void maxHistoryChanged();
     void saveImagesChanged();
     void dedupeChanged();
+    void allowDeletionItemsChanged();
 
 private:
     Storage* m_storage;

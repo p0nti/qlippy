@@ -27,6 +27,8 @@ Rectangle {
     property color metaTextColor: "#F2C14B"
     property color textIndicatorColor: "#5BC18A"
     property color imageIndicatorColor: "#E2A752"
+    property bool showDeleteIcon: false
+    property color deleteIconColor: "#E2A752"
 
     radius: 12
     clip: true
@@ -42,6 +44,7 @@ Rectangle {
         anchors.leftMargin: rowPadding
         anchors.rightMargin: rowPadding
         spacing: contentGap
+        z: 1
 
         Rectangle {
             width: 9
@@ -61,60 +64,123 @@ Rectangle {
             maximumLineCount: 1
             clip: true
             verticalAlignment: Text.AlignVCenter
-            width: rowContent.width - meta.width - 34
+            width: rowContent.width - meta.width - (root.showDeleteIcon ? 56 : 34)
             anchors.verticalCenter: parent.verticalCenter
             font.family: "IBM Plex Sans, Noto Sans, Sans Serif"
             font.pixelSize: previewFontSize
         }
 
-        Text {
+        Item {
             id: meta
+            width: metaRow.implicitWidth
+            height: metaRow.implicitHeight
             anchors.verticalCenter: parent.verticalCenter
+
             Row {
+                id: metaRow
                 spacing: 6
                 anchors.verticalCenter: parent.verticalCenter
                 // PIN indicator (if needed)
-                visible: pinned || expandEnabled
-                Text {
-                    visible: pinned
-                    text: "PIN"
-                    color: metaTextColor
-                    font.family: "IBM Plex Mono, Monospace"
-                    font.pixelSize: metaFontSize
-                }
-                // Chevron indicator for expand/collapse
+                visible: pinned
                 Item {
-                    visible: expandEnabled
-                    width: 18; height: 18
+                    visible: pinned
+                    width: 14
+                    height: 14
                     anchors.verticalCenter: parent.verticalCenter
-                    // Animated chevron
+
                     Canvas {
-                        id: chevronCanvas
                         anchors.fill: parent
-                        property real rotation: expanded ? 90 : 0
-                        onRotationChanged: chevronAnim.running = true
                         onPaint: {
                             var ctx = getContext('2d');
                             ctx.clearRect(0, 0, width, height);
-                            ctx.save();
-                            ctx.translate(width/2, height/2);
-                            ctx.rotate(rotation * Math.PI / 180);
-                            ctx.translate(-width/2, -height/2);
-                            ctx.globalAlpha = (current ? 0.95 : (root.hovered ? 0.8 : 0.5));
-                            ctx.strokeStyle = current ? currentBorderColor : baseBorderColor;
-                            ctx.lineWidth = 2.2;
+                            ctx.strokeStyle = root.metaTextColor;
+                            ctx.fillStyle = root.metaTextColor;
+                            ctx.lineWidth = 1.6;
                             ctx.lineCap = 'round';
+
+                            // Pin head
                             ctx.beginPath();
-                            ctx.moveTo(width*0.35, height*0.28);
-                            ctx.lineTo(width*0.65, height*0.5);
-                            ctx.lineTo(width*0.35, height*0.72);
+                            ctx.arc(width * 0.5, height * 0.28, width * 0.18, 0, Math.PI * 2);
+                            ctx.fill();
+
+                            // Pin body
+                            ctx.beginPath();
+                            ctx.moveTo(width * 0.5, height * 0.42);
+                            ctx.lineTo(width * 0.5, height * 0.78);
                             ctx.stroke();
-                            ctx.restore();
-                        }
-                        Behavior on rotation {
-                            NumberAnimation { id: chevronAnim; duration: 150; easing.type: Easing.OutQuad }
+
+                            // Pin tip
+                            ctx.beginPath();
+                            ctx.moveTo(width * 0.42, height * 0.78);
+                            ctx.lineTo(width * 0.5, height * 0.96);
+                            ctx.lineTo(width * 0.58, height * 0.78);
+                            ctx.closePath();
+                            ctx.fill();
                         }
                     }
+                }
+
+            }
+        }
+
+        Item {
+            id: deleteButton
+            visible: root.showDeleteIcon
+            width: 18
+            height: 18
+            anchors.verticalCenter: parent.verticalCenter
+            opacity: deleteMouse.containsMouse ? 1.0 : (root.current ? 0.84 : 0.56)
+            scale: deleteMouse.containsMouse ? 1.06 : 1.0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
+            }
+
+            Behavior on scale {
+                NumberAnimation { duration: 120; easing.type: Easing.OutQuad }
+            }
+
+            Canvas {
+                id: deleteCanvas
+                anchors.fill: parent
+                property bool hot: deleteMouse.containsMouse
+                onHotChanged: requestPaint()
+                onPaint: {
+                    var ctx = getContext('2d');
+                    ctx.clearRect(0, 0, width, height);
+                    ctx.globalAlpha = hot ? 0.98 : 0.92;
+                    ctx.strokeStyle = root.deleteIconColor;
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(width*0.3, height*0.3);
+                    ctx.lineTo(width*0.7, height*0.7);
+                    ctx.moveTo(width*0.7, height*0.3);
+                    ctx.lineTo(width*0.3, height*0.7);
+                    ctx.stroke();
+                }
+            }
+
+            MouseArea {
+                id: deleteMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    // Pinned items cannot be deleted
+                    if (root.pinned) {
+                        mouse.accepted = true
+                        return
+                    }
+
+                    if (listView) {
+                        listView.currentIndex = row
+                        listView.forceActiveFocus()
+                    }
+
+                    if (modelRef)
+                        modelRef.deleteAt(row)
+                    mouse.accepted = true
                 }
             }
         }
@@ -122,11 +188,13 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
+        z: 0
         acceptedButtons: Qt.LeftButton
         hoverEnabled: true
         onEntered: root.hovered = true
         onExited: root.hovered = false
         onClicked: {
+            root.deleteConfirmArmed = false
             if (listView) {
                 listView.currentIndex = row
                 listView.forceActiveFocus()

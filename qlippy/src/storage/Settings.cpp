@@ -100,6 +100,11 @@ bool Settings::dedupe() const
     return stringToBool(get(KeyDedupe, "1"), true);
 }
 
+bool Settings::allowDeletionItems() const
+{
+    return stringToBool(get(KeyAllowDeletionItems, "0"), false);
+}
+
 void Settings::setLayout(const QString& value)
 {
     const QString normalized = normalizeLayout(value);
@@ -166,6 +171,14 @@ void Settings::setDedupe(bool value)
         return;
     set(KeyDedupe, boolToString(value));
     emit dedupeChanged();
+}
+
+void Settings::setAllowDeletionItems(bool value)
+{
+    if (allowDeletionItems() == value)
+        return;
+    set(KeyAllowDeletionItems, boolToString(value));
+    emit allowDeletionItemsChanged();
 }
 
 // ---------------------------------------------------------------------------

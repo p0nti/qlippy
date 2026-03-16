@@ -179,6 +179,13 @@ void ClipboardModel::togglePinAt(int row)
         refresh();
 }
 
+bool ClipboardModel::isPinnedAt(int row) const
+{
+    if (row < 0 || row >= m_visible.size())
+        return false;
+    return m_all[m_visible[row]].isPinned;
+}
+
 void ClipboardModel::rebuildFilter()
 {
     // DB-level search is now used; this just rebuilds m_visible from the

@@ -13,6 +13,7 @@ class SettingsModel : public QObject {
     Q_PROPERTY(bool compactImageExpand READ compactImageExpand WRITE setCompactImageExpand NOTIFY compactImageExpandChanged)
     Q_PROPERTY(bool dedupe READ dedupe WRITE setDedupe NOTIFY dedupeChanged)
     Q_PROPERTY(bool saveImages READ saveImages WRITE setSaveImages NOTIFY saveImagesChanged)
+    Q_PROPERTY(bool allowDeletionItems READ allowDeletionItems WRITE setAllowDeletionItems NOTIFY allowDeletionItemsChanged)
     Q_PROPERTY(int maxHistory READ maxHistory WRITE setMaxHistory NOTIFY maxHistoryChanged)
 
 public:
@@ -25,6 +26,7 @@ public:
     bool compactImageExpand() const;
     bool dedupe() const;
     bool saveImages() const;
+    bool allowDeletionItems() const;
     int maxHistory() const;
 
 public slots:
@@ -35,6 +37,7 @@ public slots:
     void setCompactImageExpand(bool value);
     void setDedupe(bool value);
     void setSaveImages(bool value);
+    void setAllowDeletionItems(bool value);
     void setMaxHistory(int value);
 
 signals:
@@ -45,6 +48,7 @@ signals:
     void compactImageExpandChanged();
     void dedupeChanged();
     void saveImagesChanged();
+    void allowDeletionItemsChanged();
     void maxHistoryChanged();
 
 private:
