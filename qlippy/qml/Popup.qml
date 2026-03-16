@@ -15,15 +15,15 @@ Window {
     function themeFor(name) {
         if (name === "catppuccin") {
             return {
-                bg: "#1E1E2E",
-                panel: "#313244",
-                text: "#CDD6F4",
-                accent: "#89B4FA",
-                border: "#585B70",
-                muted: "#A6ADC8",
-                warning: "#F9E2AF",
-                selectedPanel: "#45475A",
-                veil: "#9911111B"
+                bg: "#303446",
+                panel: "#292C3C",
+                text: "#C6D0F5",
+                accent: "#CA9EE6",
+                border: "#51576D",
+                muted: "#A5ADCE",
+                warning: "#E5C890",
+                selectedPanel: "#414559",
+                veil: "#99232634"
             }
         }
         return {

@@ -69,24 +69,63 @@ Rectangle {
 
         Text {
             id: meta
-            text: {
-                const parts = []
-                if (pinned)
-                    parts.push("PIN")
-                if (expandEnabled)
-                    parts.push(expanded ? "[-]" : "[+]")
-                return parts.join(" ")
-            }
-            color: metaTextColor
             anchors.verticalCenter: parent.verticalCenter
-            font.family: "IBM Plex Mono, Monospace"
-            font.pixelSize: metaFontSize
+            Row {
+                spacing: 6
+                anchors.verticalCenter: parent.verticalCenter
+                // PIN indicator (if needed)
+                visible: pinned || expandEnabled
+                Text {
+                    visible: pinned
+                    text: "PIN"
+                    color: metaTextColor
+                    font.family: "IBM Plex Mono, Monospace"
+                    font.pixelSize: metaFontSize
+                }
+                // Chevron indicator for expand/collapse
+                Item {
+                    visible: expandEnabled
+                    width: 18; height: 18
+                    anchors.verticalCenter: parent.verticalCenter
+                    // Animated chevron
+                    Canvas {
+                        id: chevronCanvas
+                        anchors.fill: parent
+                        property real rotation: expanded ? 90 : 0
+                        onRotationChanged: chevronAnim.running = true
+                        onPaint: {
+                            var ctx = getContext('2d');
+                            ctx.clearRect(0, 0, width, height);
+                            ctx.save();
+                            ctx.translate(width/2, height/2);
+                            ctx.rotate(rotation * Math.PI / 180);
+                            ctx.translate(-width/2, -height/2);
+                            ctx.globalAlpha = (current ? 0.95 : (root.hovered ? 0.8 : 0.5));
+                            ctx.strokeStyle = current ? currentBorderColor : baseBorderColor;
+                            ctx.lineWidth = 2.2;
+                            ctx.lineCap = 'round';
+                            ctx.beginPath();
+                            ctx.moveTo(width*0.35, height*0.28);
+                            ctx.lineTo(width*0.65, height*0.5);
+                            ctx.lineTo(width*0.35, height*0.72);
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                        Behavior on rotation {
+                            NumberAnimation { id: chevronAnim; duration: 150; easing.type: Easing.OutQuad }
+                        }
+                    }
+                }
+            }
         }
     }
 
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton
+        hoverEnabled: true
+        onEntered: root.hovered = true
+        onExited: root.hovered = false
         onClicked: {
             if (listView) {
                 listView.currentIndex = row
@@ -100,4 +139,6 @@ Rectangle {
             mouse.accepted = true
         }
     }
+
+    property bool hovered: false
 }
