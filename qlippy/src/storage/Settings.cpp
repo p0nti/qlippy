@@ -5,43 +5,43 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
-namespace {
-
-QString normalizeLayout(const QString& value)
+namespace
 {
-    if (value == QLatin1String("compact") || value == QLatin1String("normal") || value == QLatin1String("big"))
-        return value;
-    return QStringLiteral("normal");
-}
 
-QString normalizeTheme(const QString& value)
-{
-    if (value == QLatin1String("catppuccin"))
-        return value;
-    if (value == QLatin1String("nord"))
+    QString normalizeLayout(const QString &value)
+    {
+        if (value == QLatin1String("compact") || value == QLatin1String("normal") || value == QLatin1String("big"))
+            return value;
+        return QStringLiteral("normal");
+    }
+
+    QString normalizeTheme(const QString &value)
+    {
+        if (value == QLatin1String("catppuccin"))
+            return value;
+        if (value == QLatin1String("nord"))
+            return QStringLiteral("teal");
         return QStringLiteral("teal");
-    return QStringLiteral("teal");
+    }
+
+    QString boolToString(bool value)
+    {
+        return value ? QStringLiteral("1") : QStringLiteral("0");
+    }
+
+    bool stringToBool(const QString &value, bool defaultValue)
+    {
+        if (value == QLatin1String("1") || value == QLatin1String("true") || value == QLatin1String("on"))
+            return true;
+        if (value == QLatin1String("0") || value == QLatin1String("false") || value == QLatin1String("off"))
+            return false;
+        return defaultValue;
+    }
+
 }
 
-QString boolToString(bool value)
-{
-    return value ? QStringLiteral("1") : QStringLiteral("0");
-}
-
-bool stringToBool(const QString& value, bool defaultValue)
-{
-    if (value == QLatin1String("1") || value == QLatin1String("true") || value == QLatin1String("on"))
-        return true;
-    if (value == QLatin1String("0") || value == QLatin1String("false") || value == QLatin1String("off"))
-        return false;
-    return defaultValue;
-}
-
-}
-
-Settings::Settings(Storage* storage, QObject* parent)
-    : QObject(parent)
-    , m_storage(storage)
+Settings::Settings(Storage *storage, QObject *parent)
+    : QObject(parent), m_storage(storage)
 {
     const QString storedTheme = get(KeyTheme, QStringLiteral("teal"));
     if (storedTheme != normalizeTheme(storedTheme))
@@ -105,7 +105,7 @@ bool Settings::allowDeletionItems() const
     return stringToBool(get(KeyAllowDeletionItems, "0"), false);
 }
 
-void Settings::setLayout(const QString& value)
+void Settings::setLayout(const QString &value)
 {
     const QString normalized = normalizeLayout(value);
     if (layout() == normalized)
@@ -123,7 +123,7 @@ void Settings::setOpacity(double value)
     emit opacityChanged();
 }
 
-void Settings::setTheme(const QString& value)
+void Settings::setTheme(const QString &value)
 {
     const QString normalized = normalizeTheme(value);
     if (theme() == normalized)
@@ -184,7 +184,7 @@ void Settings::setAllowDeletionItems(bool value)
 // ---------------------------------------------------------------------------
 // Generic
 // ---------------------------------------------------------------------------
-QString Settings::get(const QString& key, const QString& defaultValue) const
+QString Settings::get(const QString &key, const QString &defaultValue) const
 {
     QSqlQuery q(m_storage->db());
     q.prepare("SELECT value FROM settings WHERE key = :key");
@@ -194,11 +194,11 @@ QString Settings::get(const QString& key, const QString& defaultValue) const
     return defaultValue;
 }
 
-void Settings::set(const QString& key, const QString& value)
+void Settings::set(const QString &key, const QString &value)
 {
     QSqlQuery q(m_storage->db());
     q.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (:key, :value)");
-    q.bindValue(":key",   key);
+    q.bindValue(":key", key);
     q.bindValue(":value", value);
     q.exec();
 }

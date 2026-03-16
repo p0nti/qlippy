@@ -60,13 +60,13 @@ namespace
             QVERIFY2(m_process.waitForStarted(5000), "Failed to start qlippy daemon");
 
             bool ready = false;
-            for (int attempt = 0; attempt < 30; ++attempt) {
+            for (int attempt = 0; attempt < 30; ++attempt)
+            {
                 QProcess probe;
                 probe.setProcessEnvironment(m_environment);
                 probe.start(m_binaryPath, {QStringLiteral("--list")});
-                if (probe.waitForFinished(1000)
-                    && probe.exitStatus() == QProcess::NormalExit
-                    && probe.exitCode() == 0) {
+                if (probe.waitForFinished(1000) && probe.exitStatus() == QProcess::NormalExit && probe.exitCode() == 0)
+                {
                     ready = true;
                     break;
                 }
@@ -157,7 +157,8 @@ namespace
 
         const QByteArray stdoutData = process.readAllStandardOutput();
         const QByteArray stderrData = process.readAllStandardError();
-        if (process.exitCode() != 0) {
+        if (process.exitCode() != 0)
+        {
             failNow(QStringLiteral("zsh snippet failed\nstdout: %1\nstderr: %2")
                         .arg(QString::fromUtf8(stdoutData),
                              QString::fromUtf8(stderrData)));
@@ -302,13 +303,13 @@ void CliCommandTests::deleteCommandRemovesListedItem()
 
 void CliCommandTests::zshCleanupFunctionDeletesNewestListedItem()
 {
-        QTemporaryDir tempDir;
-        QVERIFY(tempDir.isValid());
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
 
-        SeededEnvironment seeded = createSeededEnvironment(tempDir);
-        const ScopedDaemon daemon(testBinaryPath(), seeded.processEnvironment);
+    SeededEnvironment seeded = createSeededEnvironment(tempDir);
+    const ScopedDaemon daemon(testBinaryPath(), seeded.processEnvironment);
 
-        const QString snippet = QStringLiteral(R"ZSH(
+    const QString snippet = QStringLiteral(R"ZSH(
 pass() {
     return 0
 }
@@ -330,18 +331,18 @@ _cliphist() {
 
 _cliphist dummy-entry
 )ZSH")
-                                                                .arg(testBinaryPath());
+                                .arg(testBinaryPath());
 
-        runZshSnippet(seeded.processEnvironment, snippet);
+    runZshSnippet(seeded.processEnvironment, snippet);
 
-        const QJsonObject listObject = runListCommand(seeded.processEnvironment);
-        const QJsonArray items = listObject.value(QStringLiteral("items")).toArray();
+    const QJsonObject listObject = runListCommand(seeded.processEnvironment);
+    const QJsonArray items = listObject.value(QStringLiteral("items")).toArray();
 
-        QVERIFY(!items.isEmpty());
-        QCOMPARE(items.at(0).toObject().value(QStringLiteral("id")).toInteger(), seeded.olderId);
+    QVERIFY(!items.isEmpty());
+    QCOMPARE(items.at(0).toObject().value(QStringLiteral("id")).toInteger(), seeded.olderId);
 
-        for (const QJsonValue &itemValue : items)
-                QVERIFY(itemValue.toObject().value(QStringLiteral("id")).toInteger() != seeded.newestId);
+    for (const QJsonValue &itemValue : items)
+        QVERIFY(itemValue.toObject().value(QStringLiteral("id")).toInteger() != seeded.newestId);
 }
 
 QTEST_MAIN(CliCommandTests)

@@ -4,7 +4,8 @@
 
 class Settings;
 
-class SettingsModel : public QObject {
+class SettingsModel : public QObject
+{
     Q_OBJECT
     Q_PROPERTY(QString layout READ layout WRITE setLayout NOTIFY layoutChanged)
     Q_PROPERTY(double opacity READ opacity WRITE setOpacity NOTIFY opacityChanged)
@@ -17,7 +18,7 @@ class SettingsModel : public QObject {
     Q_PROPERTY(int maxHistory READ maxHistory WRITE setMaxHistory NOTIFY maxHistoryChanged)
 
 public:
-    explicit SettingsModel(Settings* settings, QObject* parent = nullptr);
+    explicit SettingsModel(Settings *settings, QObject *parent = nullptr);
 
     QString layout() const;
     double opacity() const;
@@ -30,9 +31,9 @@ public:
     int maxHistory() const;
 
 public slots:
-    void setLayout(const QString& value);
+    void setLayout(const QString &value);
     void setOpacity(double value);
-    void setTheme(const QString& value);
+    void setTheme(const QString &value);
     void setExpandMode(bool value);
     void setCompactImageExpand(bool value);
     void setDedupe(bool value);
@@ -52,5 +53,5 @@ signals:
     void maxHistoryChanged();
 
 private:
-    Settings* m_settings;
+    Settings *m_settings;
 };

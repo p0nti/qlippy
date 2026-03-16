@@ -4,50 +4,56 @@
 
 #include <algorithm>
 
-ClipboardModel::ClipboardModel(HistoryRepository* repo, QObject* parent)
-    : QAbstractListModel(parent)
-    , m_repo(repo)
+ClipboardModel::ClipboardModel(HistoryRepository *repo, QObject *parent)
+    : QAbstractListModel(parent), m_repo(repo)
 {
     m_debounce.setSingleShot(true);
     m_debounce.setInterval(150);
     connect(&m_debounce, &QTimer::timeout, this, &ClipboardModel::applySearch);
 }
 
-int ClipboardModel::rowCount(const QModelIndex& parent) const
+int ClipboardModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
     return m_visible.size();
 }
 
-QVariant ClipboardModel::data(const QModelIndex& index, int role) const
+QVariant ClipboardModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= m_visible.size())
         return {};
 
-    const Item& item = m_all[m_visible[index.row()]];
-    switch (role) {
-    case IdRole: return item.id;
-    case PreviewRole: return item.textPreview;
-    case TimestampRole: return item.createdAt.toSecsSinceEpoch();
-    case PinnedRole: return item.isPinned;
-    case TypeRole: return item.kind == ItemKind::Image ? "image" : "text";
-    default: return {};
+    const Item &item = m_all[m_visible[index.row()]];
+    switch (role)
+    {
+    case IdRole:
+        return item.id;
+    case PreviewRole:
+        return item.textPreview;
+    case TimestampRole:
+        return item.createdAt.toSecsSinceEpoch();
+    case PinnedRole:
+        return item.isPinned;
+    case TypeRole:
+        return item.kind == ItemKind::Image ? "image" : "text";
+    default:
+        return {};
     }
 }
 
 QHash<int, QByteArray> ClipboardModel::roleNames() const
 {
     return {
-        { IdRole, "id" },
-        { PreviewRole, "preview" },
-        { TimestampRole, "timestamp" },
-        { PinnedRole, "pinned" },
-        { TypeRole, "type" },
+        {IdRole, "id"},
+        {PreviewRole, "preview"},
+        {TimestampRole, "timestamp"},
+        {PinnedRole, "pinned"},
+        {TypeRole, "type"},
     };
 }
 
-void ClipboardModel::setSearchText(const QString& text)
+void ClipboardModel::setSearchText(const QString &text)
 {
     if (m_searchText == text)
         return;
@@ -112,7 +118,7 @@ QString ClipboardModel::typeAt(int row) const
     if (row < 0 || row >= m_visible.size())
         return {};
 
-    const Item& item = m_all[m_visible[row]];
+    const Item &item = m_all[m_visible[row]];
     return item.kind == ItemKind::Image ? QStringLiteral("image") : QStringLiteral("text");
 }
 
@@ -121,14 +127,14 @@ QString ClipboardModel::fullTextAt(int row) const
     if (row < 0 || row >= m_visible.size())
         return {};
 
-    const Item& item = m_all[m_visible[row]];
+    const Item &item = m_all[m_visible[row]];
     if (item.kind != ItemKind::Text)
         return item.textPreview;
 
     const auto payload = m_repo->fetchPayload(item.id);
     QString text = payload && !payload->textPlain.isNull()
-        ? payload->textPlain
-        : item.textPreview;
+                       ? payload->textPlain
+                       : item.textPreview;
 
     return text;
 }
@@ -138,7 +144,7 @@ QString ClipboardModel::imageDataUrlAt(int row) const
     if (row < 0 || row >= m_visible.size())
         return {};
 
-    const Item& item = m_all[m_visible[row]];
+    const Item &item = m_all[m_visible[row]];
     if (item.kind != ItemKind::Image)
         return {};
 
@@ -146,8 +152,7 @@ QString ClipboardModel::imageDataUrlAt(int row) const
     if (!payload || payload->imagePng.isEmpty())
         return {};
 
-    return QStringLiteral("data:image/png;base64,")
-        + QString::fromLatin1(payload->imagePng.toBase64());
+    return QStringLiteral("data:image/png;base64,") + QString::fromLatin1(payload->imagePng.toBase64());
 }
 
 void ClipboardModel::activate(int row)
@@ -174,7 +179,7 @@ void ClipboardModel::togglePinAt(int row)
     if (row < 0 || row >= m_visible.size())
         return;
 
-    Item& item = m_all[m_visible[row]];
+    Item &item = m_all[m_visible[row]];
     if (m_repo->setPin(item.id, !item.isPinned))
         refresh();
 }

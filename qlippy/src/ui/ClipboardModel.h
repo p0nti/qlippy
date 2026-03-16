@@ -10,14 +10,16 @@
 
 class HistoryRepository;
 
-class ClipboardModel : public QAbstractListModel {
+class ClipboardModel : public QAbstractListModel
+{
     Q_OBJECT
     Q_PROPERTY(QString searchText READ searchText WRITE setSearchText NOTIFY searchTextChanged)
     Q_PROPERTY(int resultLimit READ resultLimit WRITE setResultLimit NOTIFY resultLimitChanged)
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
 
 public:
-    enum Roles {
+    enum Roles
+    {
         IdRole = Qt::UserRole + 1,
         PreviewRole,
         TimestampRole,
@@ -26,14 +28,14 @@ public:
     };
     Q_ENUM(Roles)
 
-    explicit ClipboardModel(HistoryRepository* repo, QObject* parent = nullptr);
+    explicit ClipboardModel(HistoryRepository *repo, QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
     QString searchText() const { return m_searchText; }
-    void setSearchText(const QString& text);
+    void setSearchText(const QString &text);
     int resultLimit() const { return m_resultLimit; }
     void setResultLimit(int limit);
 
@@ -60,7 +62,7 @@ private slots:
 private:
     void rebuildFilter();
 
-    HistoryRepository* m_repo;
+    HistoryRepository *m_repo;
     QList<Item> m_all;
     QList<int> m_visible;
     QString m_searchText;

@@ -2,9 +2,8 @@
 
 #include "storage/Settings.h"
 
-SettingsModel::SettingsModel(Settings* settings, QObject* parent)
-    : QObject(parent)
-    , m_settings(settings)
+SettingsModel::SettingsModel(Settings *settings, QObject *parent)
+    : QObject(parent), m_settings(settings)
 {
     if (!m_settings)
         return;
@@ -65,7 +64,7 @@ int SettingsModel::maxHistory() const
     return m_settings ? m_settings->maxHistory() : 500;
 }
 
-void SettingsModel::setLayout(const QString& value)
+void SettingsModel::setLayout(const QString &value)
 {
     if (!m_settings)
         return;
@@ -79,7 +78,7 @@ void SettingsModel::setOpacity(double value)
     m_settings->setOpacity(value);
 }
 
-void SettingsModel::setTheme(const QString& value)
+void SettingsModel::setTheme(const QString &value)
 {
     if (!m_settings)
         return;
