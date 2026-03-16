@@ -16,6 +16,14 @@
 #include <csignal>
 #include <cstdlib>
 
+#ifndef QLIPPY_VERSION_STR
+#define QLIPPY_VERSION_STR "0.1.0"
+#endif
+
+#ifndef QLIPPY_BUILD_TYPE_STR
+#define QLIPPY_BUILD_TYPE_STR "dev"
+#endif
+
 static bool hasArg(int argc, char *argv[], const char *arg)
 {
     for (int i = 1; i < argc; ++i)
@@ -117,7 +125,12 @@ static int cliSendPrint(const IpcMessage &msg)
 static int runWithApp(QCoreApplication &app)
 {
     QCoreApplication::setApplicationName("qlippy");
-    QCoreApplication::setApplicationVersion("0.1.0");
+
+    QString buildType = QString::fromLatin1(QLIPPY_BUILD_TYPE_STR).trimmed().toLower();
+    if (buildType.isEmpty())
+        buildType = QStringLiteral("dev");
+    QCoreApplication::setApplicationVersion(
+        QString::fromLatin1(QLIPPY_VERSION_STR) + QStringLiteral("+") + buildType);
 
     QCommandLineParser parser;
     parser.setApplicationDescription("Wayland clipboard manager");

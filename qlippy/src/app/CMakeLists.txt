@@ -8,6 +8,11 @@ target_include_directories(qlippy PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
 
+target_compile_definitions(qlippy PRIVATE
+    QLIPPY_VERSION_STR="${PROJECT_VERSION}"
+    QLIPPY_BUILD_TYPE_STR="${CMAKE_BUILD_TYPE}"
+)
+
 target_link_libraries(qlippy PRIVATE
     Qt6::Core
     Qt6::Gui
