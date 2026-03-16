@@ -18,7 +18,9 @@ QString normalizeTheme(const QString& value)
 {
     if (value == QLatin1String("catppuccin"))
         return value;
-    return QStringLiteral("nord");
+    if (value == QLatin1String("nord"))
+        return QStringLiteral("teal");
+    return QStringLiteral("teal");
 }
 
 QString boolToString(bool value)
@@ -40,7 +42,11 @@ bool stringToBool(const QString& value, bool defaultValue)
 Settings::Settings(Storage* storage, QObject* parent)
     : QObject(parent)
     , m_storage(storage)
-{}
+{
+    const QString storedTheme = get(KeyTheme, QStringLiteral("teal"));
+    if (storedTheme != normalizeTheme(storedTheme))
+        set(KeyTheme, normalizeTheme(storedTheme));
+}
 
 // ---------------------------------------------------------------------------
 // Typed getters
@@ -61,7 +67,7 @@ double Settings::opacity() const
 
 QString Settings::theme() const
 {
-    return normalizeTheme(get(KeyTheme, "nord"));
+    return normalizeTheme(get(KeyTheme, "teal"));
 }
 
 bool Settings::expandMode() const

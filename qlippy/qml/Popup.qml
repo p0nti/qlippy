@@ -27,15 +27,15 @@ Window {
             }
         }
         return {
-            bg: "#121A1F",
-            panel: "#171D20",
-            text: "#F4F1E8",
-            accent: "#42C5B8",
-            border: "#3A4B50",
-            muted: "#8FA6A2",
-            warning: "#E2A752",
-            selectedPanel: "#1D5A56",
-            veil: "#66000000"
+            bg: "#17272C",
+            panel: "#22363D",
+            text: "#E9F5F3",
+            accent: "#92DDD5",
+            border: "#5F8888",
+            muted: "#A9CAC7",
+            warning: "#E9C39E",
+            selectedPanel: "#335259",
+            veil: "#6610181B"
         }
     }
 
@@ -54,7 +54,7 @@ Window {
                 detailHeaderInset: 8,
                 detailHeaderGap: 6,
                 statusFontSize: 11,
-                statusBarHeight: 38,
+                statusBarHeight: 34,
                 controlFontSize: 12,
                 labelFontSize: 12,
                 sectionFontSize: 11,
@@ -81,7 +81,7 @@ Window {
                 detailHeaderInset: 12,
                 detailHeaderGap: 10,
                 statusFontSize: 13,
-                statusBarHeight: 48,
+                statusBarHeight: 44,
                 controlFontSize: 14,
                 labelFontSize: 14,
                 sectionFontSize: 13,
@@ -107,7 +107,7 @@ Window {
             detailHeaderInset: 10,
             detailHeaderGap: 8,
             statusFontSize: 12,
-            statusBarHeight: 42,
+            statusBarHeight: 38,
             controlFontSize: 13,
             labelFontSize: 13,
             sectionFontSize: 12,
@@ -193,6 +193,7 @@ Window {
                 selectionText: themeData.bg
                 panelColor: themeData.panel
                 borderColor: themeData.border
+                accentColor: themeData.accent
                 fieldFontSize: layoutData.searchFontSize
                 horizontalInset: layoutData.searchHorizontalInset
                 verticalInset: layoutData.searchVerticalInset
@@ -504,14 +505,8 @@ Window {
                 accentTextColor: themeData.warning
                 separatorColor: themeData.border
                 statusFontSize: layoutData.statusFontSize
-                leftText: "Enter=copy  Del=delete  P=pin  Space=toggle expand  Esc=hide"
-                centerText: (list.expandedId === -1)
-                    ? (settingsModel.expandMode
-                        ? "Hover=select  Click=copy  Space=expand"
-                        : "Hover=select  Click=copy  Expand=off")
-                    : (list.expandedMode === "image"
-                        ? "Expanded image view: Space/Esc collapse"
-                        : "Expanded text view: Space/Esc collapse")
+                leftText: 'Vibe-coded by <a href="https://github.com/p0nti/qlippy"><font color="#A8C7E6">p0nti</font></a>'
+                centerText: "Version " + (appVersion && appVersion.length > 0 ? appVersion : "0.1.0")
                 rightText: "Entries: " + clipboardModel.count
                 onOptionsClicked: root.optionsOpen = !root.optionsOpen
             }

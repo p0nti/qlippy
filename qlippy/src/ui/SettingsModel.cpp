@@ -31,7 +31,7 @@ double SettingsModel::opacity() const
 
 QString SettingsModel::theme() const
 {
-    return m_settings ? m_settings->theme() : QStringLiteral("nord");
+    return m_settings ? m_settings->theme() : QStringLiteral("teal");
 }
 
 bool SettingsModel::expandMode() const

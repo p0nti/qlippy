@@ -107,7 +107,7 @@ qlippy/build/src/app/qlippy --toggle
 Settings are persisted in the SQLite `settings` table and exposed live to QML:
 
 - `layout`: `compact | normal | big`
-- `theme`: `nord | catppuccin`
+- `theme`: `teal | catppuccin`
 - `opacity`: 0.6 to 1.0
 - `expand_mode`: enable expanded preview mode
 - `compact_image_expand`: image fit mode behavior

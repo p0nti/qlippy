@@ -18,6 +18,8 @@ Rectangle {
     readonly property real controlHeight: layoutData ? layoutData.sliderControlHeight : 32
     readonly property real tallControlHeight: layoutData ? layoutData.sliderTallControlHeight : 38
     readonly property real buttonSize: layoutData ? layoutData.sliderButtonSize : 24
+    readonly property real rowContentInset: Math.max(8, root.sliderInset - 4)
+    readonly property real toggleWidth: Math.max(56, root.buttonSize * 2)
 
     width: panelWidth
     radius: 16
@@ -111,7 +113,7 @@ Rectangle {
 
                     Repeater {
                         model: [
-                            { label: "Nord", value: "nord" },
+                            { label: "Teal", value: "teal" },
                             { label: "Catppuccin", value: "catppuccin" }
                         ]
 
@@ -233,7 +235,7 @@ Rectangle {
                 Repeater {
                     model: [
                         { label: "Expand mode", key: "expandMode" },
-                        { label: "Compact image expand", key: "compactImageExpand" },
+                        { label: "Adjust images when in expand mode", key: "compactImageExpand" },
                         { label: "Dedupe", key: "dedupe" },
                         { label: "Save images", key: "saveImages" }
                     ]
@@ -249,11 +251,15 @@ Rectangle {
                         border.color: themeData ? themeData.border : "#2F3A3F"
 
                         RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: root.sliderInset - 4
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: root.rowContentInset
+                            anchors.rightMargin: root.rowContentInset
+                            anchors.verticalCenter: parent.verticalCenter
 
                             Text {
                                 Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
                                 text: modelData.label
                                 color: themeData ? themeData.text : "#F4F1E8"
                                 font.family: "IBM Plex Sans, Noto Sans, Sans Serif"
@@ -262,7 +268,8 @@ Rectangle {
                             }
 
                             Rectangle {
-                                Layout.preferredWidth: 56
+                                Layout.alignment: Qt.AlignVCenter
+                                Layout.preferredWidth: root.toggleWidth
                                 Layout.preferredHeight: root.buttonSize
                                 radius: 12
                                 color: settingsObject && settingsObject[modelData.key]
@@ -314,11 +321,15 @@ Rectangle {
                     border.color: themeData ? themeData.border : "#2F3A3F"
 
                     RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: root.sliderInset - 4
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: root.rowContentInset
+                        anchors.rightMargin: root.rowContentInset
+                        anchors.verticalCenter: parent.verticalCenter
 
                         Text {
                             Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
                             text: "Max history"
                             color: themeData ? themeData.text : "#F4F1E8"
                             font.family: "IBM Plex Sans, Noto Sans, Sans Serif"
@@ -326,6 +337,7 @@ Rectangle {
                         }
 
                         Rectangle {
+                            Layout.alignment: Qt.AlignVCenter
                             Layout.preferredWidth: root.buttonSize
                             Layout.preferredHeight: root.buttonSize
                             radius: 8
@@ -351,6 +363,7 @@ Rectangle {
                         }
 
                         Text {
+                            Layout.alignment: Qt.AlignVCenter
                             text: settingsObject ? String(settingsObject.maxHistory) : "500"
                             color: themeData ? themeData.accent : "#42C5B8"
                             font.family: "IBM Plex Mono, Monospace"
@@ -358,6 +371,7 @@ Rectangle {
                         }
 
                         Rectangle {
+                            Layout.alignment: Qt.AlignVCenter
                             Layout.preferredWidth: root.buttonSize
                             Layout.preferredHeight: root.buttonSize
                             radius: 8
@@ -380,6 +394,68 @@ Rectangle {
                                         settingsObject.maxHistory = settingsObject.maxHistory + 25
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: root.sectionGap - 6
+
+                Text {
+                    text: "Controls"
+                    color: themeData ? themeData.accent : "#42C5B8"
+                    font.family: "IBM Plex Mono, Monospace"
+                    font.pixelSize: layoutData ? layoutData.sectionFontSize : 12
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: controlsColumn.implicitHeight + (root.rowContentInset * 2)
+                    radius: 10
+                    color: themeData ? themeData.panel : "#171D20"
+                    border.width: 1
+                    border.color: themeData ? themeData.border : "#2F3A3F"
+
+                    Column {
+                        id: controlsColumn
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: root.rowContentInset
+                        spacing: 6
+
+                        Text {
+                            text: "Keyboard"
+                            color: themeData ? themeData.muted : "#8FA6A2"
+                            font.family: "IBM Plex Mono, Monospace"
+                            font.pixelSize: layoutData ? layoutData.labelFontSize : 13
+                        }
+
+                        Text {
+                            width: parent.width
+                            wrapMode: Text.WordWrap
+                            text: "Enter\tCopy selected entry\nDel\tDelete selected entry\nP\tPin selected entry\nSpace\tExpand or collapse preview\nEsc\tHide popup"
+                            color: themeData ? themeData.text : "#F4F1E8"
+                            font.family: "IBM Plex Mono, Monospace"
+                            font.pixelSize: layoutData ? layoutData.controlFontSize : 13
+                        }
+
+                        Text {
+                            text: "Mouse"
+                            color: themeData ? themeData.muted : "#8FA6A2"
+                            font.family: "IBM Plex Mono, Monospace"
+                            font.pixelSize: layoutData ? layoutData.labelFontSize : 13
+                        }
+
+                        Text {
+                            width: parent.width
+                            wrapMode: Text.WordWrap
+                            text: "Hover\tSelect entry under cursor\nClick\tCopy selected entry"
+                            color: themeData ? themeData.text : "#F4F1E8"
+                            font.family: "IBM Plex Mono, Monospace"
+                            font.pixelSize: layoutData ? layoutData.controlFontSize : 13
                         }
                     }
                 }

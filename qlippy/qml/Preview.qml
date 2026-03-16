@@ -24,18 +24,22 @@ Rectangle {
 
     RowLayout {
         anchors.fill: parent
-        anchors.margins: 6
-        spacing: 6
+        anchors.margins: 5
+        spacing: 5
 
         Text {
             Layout.fillWidth: true
-            Layout.preferredWidth: 2
+            Layout.preferredWidth: 1
             verticalAlignment: Text.AlignVCenter
             text: root.leftText
             color: root.textColor
             font.family: "IBM Plex Mono, Monospace"
             font.pixelSize: root.statusFontSize
             elide: Text.ElideRight
+            textFormat: Text.RichText
+            onLinkActivated: function(link) {
+                Qt.openUrlExternally(link)
+            }
         }
 
         Rectangle {
@@ -46,7 +50,7 @@ Rectangle {
 
         Text {
             Layout.fillWidth: true
-            Layout.preferredWidth: 2
+            Layout.preferredWidth: 1
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             text: root.centerText
@@ -81,7 +85,7 @@ Rectangle {
         }
 
         Rectangle {
-            Layout.preferredWidth: 26
+            Layout.preferredWidth: 24
             Layout.fillHeight: true
             radius: 6
             color: root.optionsOpen ? Qt.lighter(root.panelColor, 1.25) : Qt.darker(root.panelColor, 1.08)

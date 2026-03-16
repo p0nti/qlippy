@@ -26,7 +26,7 @@ public:
     // Typed getters with defaults
     QString layout() const;       // default normal
     double opacity() const;       // default 1.0, clamped to 0.6-1.0
-    QString theme() const;        // default nord
+    QString theme() const;        // default teal
     bool expandMode() const;      // default true
     bool compactImageExpand() const; // default false
     int  maxHistory()  const;   // default 500

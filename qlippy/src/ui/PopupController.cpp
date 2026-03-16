@@ -8,6 +8,7 @@
 #include <QQuickWindow>
 #include <QScreen>
 #include <QGuiApplication>
+#include <QCoreApplication>
 #include <QUrl>
 
 PopupController::PopupController(HistoryRepository* repo, Settings* settings, QObject* parent)
@@ -31,6 +32,7 @@ bool PopupController::start()
     m_engine->rootContext()->setContextProperty("clipboardModel", m_model.get());
     m_engine->rootContext()->setContextProperty("settingsModel", m_settingsModel.get());
     m_engine->rootContext()->setContextProperty("popupController", this);
+    m_engine->rootContext()->setContextProperty("appVersion", QCoreApplication::applicationVersion());
     m_engine->load(QUrl(QStringLiteral("qrc:/qml/Popup.qml")));
 
     if (m_engine->rootObjects().isEmpty())
