@@ -3,6 +3,9 @@
 #include "ipc/IpcMessage.h"
 #include "common/Logger.h"
 
+#include <QtQml/qqmlextensionplugin.h>
+Q_IMPORT_QML_PLUGIN(QlippyPlugin)
+
 #include <QCoreApplication>
 #include <QApplication>
 #include <QCommandLineParser>

@@ -4,6 +4,7 @@
 #include <QList>
 #include <QString>
 #include <QTimer>
+#include <QtQml/qqml.h>
 #include <functional>
 
 #include "storage/Item.h"
@@ -13,6 +14,8 @@ class HistoryRepository;
 class ClipboardModel : public QAbstractListModel
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("ClipboardModel is created in C++")
     Q_PROPERTY(QString searchText READ searchText WRITE setSearchText NOTIFY searchTextChanged)
     Q_PROPERTY(int resultLimit READ resultLimit WRITE setResultLimit NOTIFY resultLimitChanged)
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)

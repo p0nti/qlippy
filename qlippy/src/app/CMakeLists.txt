@@ -1,7 +1,6 @@
 qt_add_executable(qlippy
     main.cpp
     DaemonApp.cpp
-    ${CMAKE_SOURCE_DIR}/qml/qlippy.qrc
 )
 
 target_include_directories(qlippy PRIVATE
@@ -27,6 +26,7 @@ target_link_libraries(qlippy PRIVATE
     qlippy_storage
     qlippy_platform
     qlippy_ui
+    qlippyplugin
 )
 
 include(GNUInstallDirs)

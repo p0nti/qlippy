@@ -1,6 +1,8 @@
 #pragma once
 
+#include <QCoreApplication>
 #include <QObject>
+#include <QtQml/qqml.h>
 #include <memory>
 
 class HistoryRepository;
@@ -12,7 +14,12 @@ class QQmlApplicationEngine;
 
 class PopupController : public QObject {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("PopupController is created in C++")
+    Q_PROPERTY(QString appVersion READ appVersion CONSTANT)
 public:
+    QString appVersion() const { return QCoreApplication::applicationVersion(); }
+
     explicit PopupController(HistoryRepository* repo, Settings* settings, QObject* parent = nullptr);
     ~PopupController() override;
 

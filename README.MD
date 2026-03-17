@@ -154,3 +154,7 @@ systemctl --user enable --now qlippy.service
   - Restart the daemon
 - No history persisted:
   - Verify `~/.local/share/qlippy/db.sqlite` exists and is writable
+
+## Other
+
+A vibe-coded proof of concept to see how far you can get with a Wayland clipboard manager in a single sitting.

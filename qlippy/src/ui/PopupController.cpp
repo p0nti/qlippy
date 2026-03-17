@@ -4,11 +4,9 @@
 #include "SettingsModel.h"
 
 #include <QQmlApplicationEngine>
-#include <QQmlContext>
 #include <QQuickWindow>
 #include <QScreen>
 #include <QGuiApplication>
-#include <QCoreApplication>
 #include <QUrl>
 
 PopupController::PopupController(HistoryRepository* repo, Settings* settings, QObject* parent)
@@ -29,11 +27,12 @@ bool PopupController::start()
     });
 
     m_engine = std::make_unique<QQmlApplicationEngine>();
-    m_engine->rootContext()->setContextProperty("clipboardModel", m_model.get());
-    m_engine->rootContext()->setContextProperty("settingsModel", m_settingsModel.get());
-    m_engine->rootContext()->setContextProperty("popupController", this);
-    m_engine->rootContext()->setContextProperty("appVersion", QCoreApplication::applicationVersion());
-    m_engine->load(QUrl(QStringLiteral("qrc:/qml/Popup.qml")));
+    m_engine->setInitialProperties({
+        {"clipboardModel",  QVariant::fromValue(m_model.get())},
+        {"settingsModel",   QVariant::fromValue(m_settingsModel.get())},
+        {"popupController", QVariant::fromValue(this)},
+    });
+    m_engine->load(QUrl(QStringLiteral("qrc:/qt/qml/Qlippy/ClipboardWindow.qml")));
 
     if (m_engine->rootObjects().isEmpty())
         return false;

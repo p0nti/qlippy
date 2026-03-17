@@ -8,6 +8,18 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "build"
+		},
+		{
+			"label": "Lint QML",
+			"type": "shell",
+			"command": "cmake --build '${workspaceFolder}/qlippy/build' --target qlippy_ui_qmllint",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
 		}
 	]
 }

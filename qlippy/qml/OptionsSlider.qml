@@ -1,13 +1,14 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qlippy
 
 Rectangle {
     id: root
 
     property bool panelOpen: false
     property real panelWidth: 260
-    property var settingsObject: null
+    property SettingsModel settingsObject: null
     property var themeData: null
     property var layoutData: null
 
@@ -129,6 +130,7 @@ Rectangle {
                     }
 
                     delegate: ItemDelegate {
+                        // qmllint disable missing-property
                         required property var modelData
                         required property int index
 
@@ -157,6 +159,7 @@ Rectangle {
                                 ? (themeData ? themeData.accent : "#42C5B8")
                                 : (themeData ? themeData.border : "#2F3A3F")
                         }
+                        // qmllint enable missing-property
                     }
 
                     contentItem: Text {

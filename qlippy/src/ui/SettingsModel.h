@@ -1,12 +1,15 @@
 #pragma once
 
 #include <QObject>
+#include <QtQml/qqml.h>
 
 class Settings;
 
 class SettingsModel : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("SettingsModel is created in C++")
     Q_PROPERTY(QString layout READ layout WRITE setLayout NOTIFY layoutChanged)
     Q_PROPERTY(double opacity READ opacity WRITE setOpacity NOTIFY opacityChanged)
     Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY themeChanged)

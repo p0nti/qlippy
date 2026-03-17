@@ -1,4 +1,5 @@
-import QtQuick 2.15
+import QtQuick
+import Qlippy
 
 Rectangle {
     id: root
@@ -8,8 +9,8 @@ Rectangle {
     property bool expandEnabled: true
     property int row: -1
     property var listView: null
-    property var modelRef: null
-    property var itemId: 0
+    property ClipboardModel modelRef: null
+    property int itemId: 0
     property string typeText: "text"
     property string previewText: ""
     property int timestamp: 0
