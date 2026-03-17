@@ -1,5 +1,4 @@
 qlippy/build/
 
-# Saved chat export with personal metadata; keep local, do not publish.
-doc/Wayland Clipboard Manager Options.html
-doc/Wayland Clipboard Manager Options_files/
+# Local documentation and research; keep local, do not publish.
+doc/

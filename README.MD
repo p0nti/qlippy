@@ -7,7 +7,7 @@ It runs as a background daemon, captures clipboard history, and exposes a popup 
 
 - Runs a long-lived daemon that watches clipboard changes on Wayland.
 - Stores clipboard history in SQLite with metadata and payload tables.
-- Exposes a local IPC API over a Unix local socket for CLI and popup control.
+- Exposes a local IPC API over a Unix socket for CLI and popup control.
 - Provides a Qt Quick popup UI with:
   - Search and keyboard-first navigation
   - Pin/unpin and delete actions
@@ -18,8 +18,6 @@ It runs as a background daemon, captures clipboard history, and exposes a popup 
 ## Repository layout
 
 - `qlippy/`: Main C++/Qt project
-- `doc/`: Design notes, phased implementation docs, and options specification
-- `doc/Wayland Clipboard Manager Options.html`: Captured option UI reference
 
 Inside `qlippy/`:
 
@@ -45,16 +43,24 @@ Inside `qlippy/`:
 
 ## Build
 
-From repository root:
+A convenience script is provided:
 
 ```bash
-cmake -S qlippy -B qlippy/build -DCMAKE_BUILD_TYPE=Release
-cmake --build qlippy/build --target qlippy -j$(nproc)
+qlippy/build.sh
 ```
 
-Executable path:
+Or manually from repository root:
 
 ```bash
+cmake -S qlippy -B qlippy/build
+cmake --build qlippy/build
+```
+
+A VS Code task is also available: **Build qlippy (build.sh)** — kills any running instance, builds, and launches the daemon.
+
+Executable path after build:
+
+```
 qlippy/build/src/app/qlippy
 ```
 
@@ -81,39 +87,40 @@ qlippy/build/src/app/qlippy --toggle
 ## CLI reference
 
 ```text
---daemon                Run as daemon
---popup                 Show popup
---toggle                Toggle popup
+--daemon                Run as background daemon
+--popup                 Show clipboard popup
+--toggle                Toggle clipboard popup
 --list                  List history (JSON)
 --search <query>        Search history (JSON)
 --copy <id>             Copy entry to clipboard
 --delete <id>           Delete entry
 --pin <id>              Pin entry
 --unpin <id>            Unpin entry
---clear                 Clear history
---stop                  Stop daemon
---verbose               Debug logging
+--clear                 Clear all history
+--stop                  Stop the running daemon
+--verbose               Enable debug logging
 ```
 
 ## Data and runtime paths
 
 - Database: `~/.local/share/qlippy/db.sqlite`
 - Logs: `~/.local/state/qlippy/log.txt`
-- IPC socket name: `qlippy-ipc-v1`
-  - Socket path is resolved under `$XDG_RUNTIME_DIR` (fallbacks apply)
+- IPC socket: `$XDG_RUNTIME_DIR/qlippy-ipc-v1`
+  - Falls back to Qt RuntimeLocation, then `/tmp` if `$XDG_RUNTIME_DIR` is unset
 
 ## Settings model (runtime, persisted)
 
 Settings are persisted in the SQLite `settings` table and exposed live to QML:
 
 - `layout`: `compact | normal | big`
-- `theme`: `teal | catppuccin`
-- `opacity`: 0.6 to 1.0
+- `theme`: `teal | catppuccin | system-dark | system-light`
+- `opacity`: `0.6` to `1.0`
 - `expand_mode`: enable expanded preview mode
-- `compact_image_expand`: image fit mode behavior
-- `max_history`: max retained entries
+- `compact_image_expand`: image fit mode in compact layout
+- `max_history`: max retained entries (default: 500)
 - `save_images`: persist image payloads
 - `dedupe`: deduplicate repeated content
+- `allow_deletion_items`: allow items to be deleted from history
 
 ## systemd user service
 
@@ -133,16 +140,17 @@ systemctl --user enable --now qlippy.service
 ## Development notes
 
 - The popup UI is loaded from Qt resources (`qml/qlippy.qrc`).
-- After QML/source edits, rebuild and restart daemon to load updated resources.
-- The project currently uses a single executable for daemon + client commands.
+- After QML or source edits, rebuild and restart the daemon to load updated resources.
+- The project uses a single executable for both daemon and client commands.
+- The VS Code task (`.vscode/tasks.json`) handles kill, build, and launch in one step.
 
 ## Quick troubleshooting
 
 - Popup does not open:
-  - Ensure daemon is running (`qlippy --daemon`)
-  - Check logs in `~/.local/state/qlippy/log.txt`
+  - Ensure daemon is running: `qlippy/build/src/app/qlippy --daemon`
+  - Check logs: `~/.local/state/qlippy/log.txt`
 - CLI cannot connect:
-  - Verify runtime socket exists under `$XDG_RUNTIME_DIR`
-  - Restart daemon
+  - Verify socket exists: `ls $XDG_RUNTIME_DIR/qlippy-ipc-v1`
+  - Restart the daemon
 - No history persisted:
   - Verify `~/.local/share/qlippy/db.sqlite` exists and is writable
