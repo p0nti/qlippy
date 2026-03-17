@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build qlippy (build.sh)",
+			"type": "shell",
+			"command": "pkill -f '${workspaceFolder}/qlippy/build/src/app/qlippy' || true; '${workspaceFolder}/qlippy/build.sh' && '${workspaceFolder}/qlippy/build/src/app/qlippy' --daemon",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}
