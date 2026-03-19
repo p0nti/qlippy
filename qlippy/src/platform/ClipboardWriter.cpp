@@ -7,6 +7,9 @@
 #include "ext-data-control-v1-client-protocol.h"
 #include "wlr-data-control-unstable-v1-client-protocol.h"
 
+#include <QSocketNotifier>
+
+#include <fcntl.h>
 #include <unistd.h>
 #include <cerrno>
 
@@ -112,6 +115,7 @@ ClipboardWriter::ClipboardWriter(WaylandConnection* conn,
 
 ClipboardWriter::~ClipboardWriter()
 {
+    abortPendingWrites();
     destroySource();
     if (m_device) {
         if (m_useExt)
@@ -170,21 +174,69 @@ void ClipboardWriter::setSelection(const QStringList& mimes)
 void ClipboardWriter::onSourceSend(const char* mime, int fd)
 {
     const QString mimeStr = QString::fromUtf8(mime);
-    const QByteArray data = (mimeStr == "image/png") ? m_imagePng
-                                                      : m_text.toUtf8();
+    QByteArray data = (mimeStr == QLatin1String("image/png")) ? m_imagePng
+                                                               : m_text.toUtf8();
 
-    qint64 written = 0;
-    while (written < data.size()) {
-        ssize_t n = ::write(fd, data.constData() + written,
-                            static_cast<size_t>(data.size() - written));
+    // Non-blocking so writes never stall the event loop
+    ::fcntl(fd, F_SETFL, ::fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+
+    const bool idle = m_writeQueue.empty();
+    m_writeQueue.push({fd, std::move(data), 0});
+    if (idle)
+        startNextWrite();
+}
+
+void ClipboardWriter::startNextWrite()
+{
+    Q_ASSERT(!m_writeQueue.empty());
+    Q_ASSERT(!m_writeNotifier);
+
+    m_writeNotifier = new QSocketNotifier(
+        m_writeQueue.front().fd, QSocketNotifier::Write, this);
+    connect(m_writeNotifier, &QSocketNotifier::activated,
+            this, &ClipboardWriter::onWriteReady);
+}
+
+void ClipboardWriter::onWriteReady()
+{
+    Q_ASSERT(!m_writeQueue.empty());
+    PendingWrite& pw = m_writeQueue.front();
+
+    while (pw.pos < pw.data.size()) {
+        ssize_t n = ::write(pw.fd,
+                            pw.data.constData() + pw.pos,
+                            static_cast<std::size_t>(pw.data.size() - pw.pos));
         if (n < 0) {
-            if (errno == EINTR) continue;
+            if (errno == EINTR)                          continue;
+            if (errno == EAGAIN || errno == EWOULDBLOCK) return; // re-armed automatically
             LOG_WARN("ClipboardWriter: write to paste fd failed");
             break;
         }
-        written += n;
+        pw.pos += n;
     }
-    ::close(fd);
+
+    // Done (or unrecoverable error) — retire this entry
+    m_writeNotifier->setEnabled(false);
+    m_writeNotifier->deleteLater();
+    m_writeNotifier = nullptr;
+    ::close(pw.fd);
+    m_writeQueue.pop();
+
+    if (!m_writeQueue.empty())
+        startNextWrite();
+}
+
+void ClipboardWriter::abortPendingWrites()
+{
+    if (m_writeNotifier) {
+        m_writeNotifier->setEnabled(false);
+        m_writeNotifier->deleteLater();
+        m_writeNotifier = nullptr;
+    }
+    while (!m_writeQueue.empty()) {
+        ::close(m_writeQueue.front().fd);
+        m_writeQueue.pop();
+    }
 }
 
 void ClipboardWriter::onSourceCancelled()
