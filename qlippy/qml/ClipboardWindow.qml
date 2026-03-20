@@ -98,6 +98,7 @@ Window {
                 border: "#51576D",
                 muted: "#A5ADCE",
                 warning: "#E5C890",
+                lavender: "#BABBF1",
                 selectedPanel: "#414559",
                 veil: "#99232634"
             }
@@ -110,6 +111,7 @@ Window {
             border: "#5F8888",
             muted: "#A9CAC7",
             warning: "#E9C39E",
+            lavender: "#A0BFCB",
             selectedPanel: "#335259",
             veil: "#6610181B"
         }
@@ -228,32 +230,89 @@ Window {
         border.width: 1
         border.color: themeData.border
         opacity: settingsModel.opacity
+        clip: true
         gradient: Gradient {
-            GradientStop { position: 0.0; color: Qt.lighter(themeData.bg, 1.06) }
-            GradientStop { position: 1.0; color: Qt.darker(themeData.bg, 1.08) }
+            GradientStop { position: 0.0;  color: Qt.lighter(themeData.bg, 1.12) }
+            GradientStop { position: 0.45; color: themeData.bg }
+            GradientStop { position: 1.0;  color: Qt.darker(themeData.bg, 1.16) }
         }
 
-        Rectangle {
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.margins: -70
-            width: 260
-            height: 260
-            radius: 130
-            color: themeData.accent
-            opacity: 0.25
+        // Smooth radial glow layer — no hard circles, genuine aurora feel
+        Canvas {
+            anchors.fill: parent
+            property color accent:   themeData.accent
+            property color warning:  themeData.warning
+            property color muted:    themeData.muted
+            property color lavender: themeData.lavender || themeData.muted
+
+            onAccentChanged:   requestPaint()
+            onWarningChanged:  requestPaint()
+            onMutedChanged:    requestPaint()
+            onLavenderChanged: requestPaint()
+            onWidthChanged:    requestPaint()
+            onHeightChanged:   requestPaint()
+
+            onPaint: {
+                var ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+
+                // Clip painting to the rounded card shape so gradients never
+                // bleed into corners (clip:true on Rectangle only clips the bbox).
+                var r = 18
+                ctx.save()
+                ctx.beginPath()
+                ctx.moveTo(r, 0)
+                ctx.lineTo(width - r, 0)
+                ctx.arcTo(width, 0,      width, r,          r)
+                ctx.lineTo(width, height - r)
+                ctx.arcTo(width, height, width - r, height,  r)
+                ctx.lineTo(r, height)
+                ctx.arcTo(0, height,  0, height - r,         r)
+                ctx.lineTo(0, r)
+                ctx.arcTo(0, 0,       r, 0,                  r)
+                ctx.closePath()
+                ctx.clip()
+
+                // Top-left accent aurora
+                var g1 = ctx.createRadialGradient(
+                    width * 0.10, height * 0.10, 0,
+                    width * 0.10, height * 0.10, width * 0.55)
+                g1.addColorStop(0, Qt.rgba(accent.r,  accent.g,  accent.b,  0.22))
+                g1.addColorStop(1, Qt.rgba(accent.r,  accent.g,  accent.b,  0.00))
+                ctx.fillStyle = g1
+                ctx.fillRect(0, 0, width, height)
+
+                // Bottom-right warning aurora
+                var g2 = ctx.createRadialGradient(
+                    width * 0.90, height * 0.90, 0,
+                    width * 0.90, height * 0.90, width * 0.55)
+                g2.addColorStop(0, Qt.rgba(warning.r, warning.g, warning.b, 0.17))
+                g2.addColorStop(1, Qt.rgba(warning.r, warning.g, warning.b, 0.00))
+                ctx.fillStyle = g2
+                ctx.fillRect(0, 0, width, height)
+
+                // Centre lavender depth
+                var g3 = ctx.createRadialGradient(
+                    width * 0.50, height * 0.48, 0,
+                    width * 0.50, height * 0.48, width * 0.42)
+                g3.addColorStop(0, Qt.rgba(lavender.r, lavender.g, lavender.b, 0.10))
+                g3.addColorStop(1, Qt.rgba(lavender.r, lavender.g, lavender.b, 0.00))
+                ctx.fillStyle = g3
+                ctx.fillRect(0, 0, width, height)
+
+                // Top-right lavender highlight
+                var g4 = ctx.createRadialGradient(
+                    width * 0.88, height * 0.08, 0,
+                    width * 0.88, height * 0.08, width * 0.40)
+                g4.addColorStop(0, Qt.rgba(lavender.r, lavender.g, lavender.b, 0.16))
+                g4.addColorStop(1, Qt.rgba(lavender.r, lavender.g, lavender.b, 0.00))
+                ctx.fillStyle = g4
+                ctx.fillRect(0, 0, width, height)
+
+                ctx.restore()
+            }
         }
 
-        Rectangle {
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            anchors.margins: -80
-            width: 300
-            height: 300
-            radius: 150
-            color: themeData.warning
-            opacity: 0.15
-        }
 
         ColumnLayout {
             anchors.fill: parent
