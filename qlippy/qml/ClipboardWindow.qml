@@ -337,6 +337,7 @@ Window {
                         if (expandedMode === "image") {
                             expandedImageUrl = clipboardModel.imageDataUrlAt(row)
                             expandedText = ""
+                            detailPanel.adjustImage = settingsModel.compactImageExpand
                         } else {
                             expandedText = clipboardModel.fullTextAt(row)
                             expandedImageUrl = ""
@@ -454,6 +455,7 @@ Window {
                     color: Qt.darker(themeData.panel, 1.08)
                     border.width: 1
                     border.color: themeData.border
+                    property bool adjustImage: settingsModel.compactImageExpand
 
                     RowLayout {
                         id: detailHeader
@@ -469,6 +471,40 @@ Window {
                             color: themeData.accent
                             font.family: "IBM Plex Sans, Noto Sans, Sans Serif"
                             font.pixelSize: layoutData.controlFontSize
+                        }
+
+                        CheckBox {
+                            id: adjustImageCheck
+                            visible: list.expandedMode === "image"
+                            checked: detailPanel.adjustImage
+                            onCheckedChanged: detailPanel.adjustImage = checked
+                            focusPolicy: Qt.NoFocus
+                            spacing: 5
+                            contentItem: Text {
+                                leftPadding: adjustImageCheck.indicator.width + adjustImageCheck.spacing
+                                text: "Adjust image"
+                                font.family: "IBM Plex Mono, Monospace"
+                                font.pixelSize: layoutData.metaFontSize
+                                color: themeData.muted
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            indicator: Rectangle {
+                                implicitWidth: layoutData.metaFontSize + 4
+                                implicitHeight: layoutData.metaFontSize + 4
+                                x: adjustImageCheck.leftPadding
+                                y: (adjustImageCheck.height - height) / 2
+                                radius: 3
+                                color: adjustImageCheck.checked ? themeData.accent : "transparent"
+                                border.color: adjustImageCheck.checked ? themeData.accent : themeData.muted
+                                border.width: 1
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "\u2713"
+                                    color: themeData.bg
+                                    font.pixelSize: parent.implicitHeight - 3
+                                    visible: adjustImageCheck.checked
+                                }
+                            }
                         }
 
                         Text {
@@ -557,11 +593,11 @@ Window {
                                 cache: false
                                 sourceSize.width: 0
                                 sourceSize.height: 0
-                                fillMode: settingsModel.compactImageExpand ? Image.PreserveAspectFit : Image.Pad
-                                width: settingsModel.compactImageExpand ? imageFlick.width : implicitWidth
-                                height: settingsModel.compactImageExpand ? imageFlick.height : implicitHeight
-                                x: settingsModel.compactImageExpand ? 0 : (imageFlick.contentWidth - width) / 2
-                                y: settingsModel.compactImageExpand ? 0 : (imageFlick.contentHeight - height) / 2
+                                fillMode: detailPanel.adjustImage ? Image.PreserveAspectFit : Image.Pad
+                                width: detailPanel.adjustImage ? imageFlick.width : implicitWidth
+                                height: detailPanel.adjustImage ? imageFlick.height : implicitHeight
+                                x: detailPanel.adjustImage ? 0 : (imageFlick.contentWidth - width) / 2
+                                y: detailPanel.adjustImage ? 0 : (imageFlick.contentHeight - height) / 2
                             }
 
                             Text {
