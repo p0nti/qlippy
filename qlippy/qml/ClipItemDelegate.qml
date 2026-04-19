@@ -30,6 +30,8 @@ Rectangle {
     property color imageIndicatorColor: "#E2A752"
     property bool showDeleteIcon: false
     property color deleteIconColor: "#E2A752"
+    property string thumbnailSource: ""
+    property real thumbnailCellWidth: typeText === "image" ? Math.round((rowHeight - 14) * 1.33) : 0
 
     radius: 12
     clip: true
@@ -57,7 +59,7 @@ Rectangle {
 
         Text {
             id: summaryText
-            text: (previewText.length > 0 ? previewText : (typeText === "image" ? "[Image item]" : "[Empty text]"))
+            text: (previewText.length > 0 ? previewText : (typeText === "image" ? "Image" : "[Empty text]"))
                   .replace(/[\r\n\t]+/g, " ")
             color: bodyTextColor
             elide: Text.ElideRight
@@ -65,10 +67,31 @@ Rectangle {
             maximumLineCount: 1
             clip: true
             verticalAlignment: Text.AlignVCenter
-            width: rowContent.width - meta.width - (root.showDeleteIcon ? 56 : 34)
+            width: rowContent.width - meta.width
+                   - (root.thumbnailCellWidth > 0 ? root.thumbnailCellWidth + contentGap : 0)
+                   - (root.showDeleteIcon ? 56 : 34)
             anchors.verticalCenter: parent.verticalCenter
             font.family: "IBM Plex Sans, Noto Sans, Sans Serif"
             font.pixelSize: previewFontSize
+        }
+
+        Rectangle {
+            id: thumb
+            visible: root.thumbnailCellWidth > 0
+            width: root.thumbnailCellWidth
+            height: root.rowHeight - 14
+            radius: 5
+            clip: true
+            anchors.verticalCenter: parent.verticalCenter
+            color: Qt.rgba(0, 0, 0, 0.25)
+
+            Image {
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop
+                source: root.thumbnailSource
+                asynchronous: true
+                smooth: true
+            }
         }
 
         Item {
@@ -209,4 +232,9 @@ Rectangle {
     }
 
     property bool hovered: false
+
+    Component.onCompleted: {
+        if (typeText === "image" && modelRef)
+            thumbnailSource = modelRef.imageDataUrlAt(row)
+    }
 }
